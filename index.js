@@ -1,7 +1,11 @@
 import express from "express";
 import bodyParser from "body-parser";
+import mongoose from "mongoose";
+import connectDB from "./config/db.js";
 
 let app = express();
+
+connectDB();
 
 app.use(bodyParser.json());
 
