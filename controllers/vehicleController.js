@@ -21,7 +21,7 @@ export async function getVehicles(req, res) {
 
 export async function getVehicleById(req, res) {
   try {
-    const vehicle = await Vehicle.findOne({ productID: req.params.productID });
+    const vehicle = await Vehicle.findOne({ vehicleID: req.params.vehicleID });
     if (!vehicle) {
       return res.status(404).json({ message: "Vehicle not found" });
     }
@@ -34,7 +34,7 @@ export async function getVehicleById(req, res) {
 export async function updateVehicle(req, res) {
   try {
     const updatedVehicle = await Vehicle.findOneAndUpdate(
-      { productID: req.params.productID },
+      { vehicleID: req.params.vehicleID },
       req.body,
       { new: true }
     );
@@ -49,7 +49,7 @@ export async function updateVehicle(req, res) {
 
 export async function deleteVehicle(req, res) {
   try {
-    const deletedVehicle = await Vehicle.findOneAndDelete({ productID: req.params.productID });
+    const deletedVehicle = await Vehicle.findOneAndDelete({ vehicleID: req.params.vehicleID });
     if (!deletedVehicle) {
       return res.status(404).json({ message: "Vehicle not found" });
     }

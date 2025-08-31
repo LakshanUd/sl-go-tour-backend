@@ -1,7 +1,7 @@
 import mongoose from "mongoose";
 
 const vehicleSchema = new mongoose.Schema({
-    productID: {
+    vehicleID: {
         type: String,
         required: true,
         unique: true,

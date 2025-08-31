@@ -1,10 +1,11 @@
 import express from "express";
 import bodyParser from "body-parser";
-import mongoose from "mongoose";
 import connectDB from "./config/db.js";
 import vehicleRouter from "./routes/vehicleRouter.js";
+import cors from "cors";
 
 let app = express();
+app.use(cors());
 
 connectDB();
 
