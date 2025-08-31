@@ -34,7 +34,7 @@ const vehicleSchema = new mongoose.Schema({
     images: {
         type: [String],
         required: true,
-        default: ["https://www.google.com/url?sa=i&url=https%3A%2F%2Fwww.vecteezy.com%2Ffree-vector%2Fblue-car&psig=AOvVaw2LDvrUqVZpjjepjoReYBge&ust=1756627245413000&source=images&cd=vfe&opi=89978449&ved=0CBUQjRxqFwoTCKjnncmIso8DFQAAAAAdAAAAABAE"]
+        default: ["https://png.pngtree.com/png-clipart/20230502/original/pngtree-yellow-family-car-png-image_9131962.png"]
     }
   },
   { timestamps: true }
