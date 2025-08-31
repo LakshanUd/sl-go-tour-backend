@@ -1,5 +1,6 @@
 import Vehicle from "../models/vehicle.js";
 
+//create
 export async function createVehicle(req, res) {
   try {
     const vehicle = new Vehicle(req.body);
