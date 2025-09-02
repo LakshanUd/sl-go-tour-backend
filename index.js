@@ -3,6 +3,7 @@ import bodyParser from "body-parser";
 import connectDB from "./config/db.js";
 import vehicleRouter from "./routes/vehicleRouter.js";
 
+import blogRouter from "./routes/BlogRoute.js";
 import InventoryRoutes from "./routes/InventoryRoutes.js";
 import mealRouter from "./routes/MealRoute.js";
 import feedbackRouter from "./routes/FeedbackRoute.js";
@@ -17,9 +18,12 @@ app.use(cors());
 
 connectDB();
 
+
+
 app.use(bodyParser.json());
 
 app.use("/api/vehicles", vehicleRouter);
+app.use("/blogs", blogRouter);
 
 app.use("/api/inventory", InventoryRoutes);
 app.use("/api/accommodations", AccommodationRoute);
