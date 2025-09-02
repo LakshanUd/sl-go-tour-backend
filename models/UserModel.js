@@ -1,8 +1,7 @@
-//UserModel.js
+// models/UserModel.js
+import mongoose from "mongoose";
 
-const mongoose = require("mongoose");
-
-const UserSchema = new mongoose.Schema(
+const userSchema = new mongoose.Schema(
   {
     firstName: {
       type: String,
@@ -33,12 +32,12 @@ const UserSchema = new mongoose.Schema(
     },
     role: {
       type: String,
-      //enum: ["Customer", "Staff", "Admin"],
+      enum: ["Customer", "Staff", "Admin"],
       default: "Customer",
     },
     gender: {
       type: String,
-      //enum: ["Male", "Female", "Other"],
+      enum: ["Male", "Female", "Other"],
       required: true,
     },
     password: {
@@ -48,12 +47,10 @@ const UserSchema = new mongoose.Schema(
     },
   },
   {
-    timestamps: true, // automatically add createdAt, updatedAt
+    timestamps: true, // createdAt, updatedAt
   }
 );
 
-module.exports = mongoose.model("User", UserSchema);
+const User = mongoose.model("User", userSchema);
 
-
-
-
+export default User;
