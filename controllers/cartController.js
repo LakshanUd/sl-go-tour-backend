@@ -62,7 +62,7 @@ export async function addItem(req, res) {
       name, image, code,
       unitPrice, currency = "LKR",
       qty = 1,
-      startDate, endDate, notes,
+      startDate, endDate, duration, notes,
     } = req.body || {};
 
     if (!serviceType || !refId || !name || unitPrice == null)
@@ -96,6 +96,7 @@ export async function addItem(req, res) {
         currency, unitPrice: Number(unitPrice), qty: Number(qty || 1),
         startDate: startDate ? new Date(startDate) : undefined,
         endDate:   endDate ? new Date(endDate) : undefined,
+        duration:  duration || "",
         notes,
       });
     }
@@ -211,6 +212,7 @@ export async function checkout(req, res) {
       image: it.image,
       startDate: it.startDate,
       endDate: it.endDate,
+      duration: it.duration,
       qty: it.qty,
       pax: 1,
       notes: it.notes,
@@ -323,7 +325,7 @@ export async function handleStripeWebhook(req, res) {
           if (vehicleIds.length) {
             await Vehicle.updateMany(
               { _id: { $in: vehicleIds } },
-              { $set: { status: "inactive" } }
+              { $set: { status: "Unavailable" } }
             );
           }
 

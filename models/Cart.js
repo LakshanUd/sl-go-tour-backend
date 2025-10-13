@@ -28,6 +28,7 @@ const CartItemSchema = new Schema(
     // optional date window for items (accommodation/vehicle/tour)
     startDate:  { type: Date },
     endDate:    { type: Date },
+    duration:   { type: String, default: "" }, // tour duration (e.g., "3 days", "5 days")
     notes:      { type: String, default: "" },
   },
   { _id: true, timestamps: false }

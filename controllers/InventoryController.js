@@ -17,19 +17,30 @@ export const getAllInventory = async (req, res, next) => {
 // POST /api/inventory
 export const addInventory = async (req, res, next) => {
   try {
+    // Check authentication and role
+    if (!req.user) {
+      return res.status(403).json({ message: "You need to login first" });
+    }
+
+    const allowedRoles = ["Admin", "IN-Manager"];
+    if (!allowedRoles.includes(req.user.role)) {
+      return res.status(403).json({ message: "You cannot add inventory items" });
+    }
     const {
       item, type, quantity, unitCost,
       name, category, description, location,
       purchaseDate, expiryDate
     } = req.body;
 
-    if (!item) return res.status(400).json({ error: "item is required" });
-    if (!isValidObjectId(item)) {
+    // Generate a dummy ObjectId for item if not provided (for direct inventory creation)
+    const itemId = item || new mongoose.Types.ObjectId();
+    
+    if (item && !isValidObjectId(item)) {
       return res.status(400).json({ error: "item must be a valid ObjectId" });
     }
 
     const doc = await Inventory.create({
-      item,
+      item: itemId,
       type,
       quantity,
       unitCost,
@@ -65,6 +76,15 @@ export const getById = async (req, res, next) => {
 // PUT /api/inventory/:id
 export const updateInventory = async (req, res, next) => {
   try {
+    // Check authentication and role
+    if (!req.user) {
+      return res.status(403).json({ message: "You need to login first" });
+    }
+
+    const allowedRoles = ["Admin", "IN-Manager"];
+    if (!allowedRoles.includes(req.user.role)) {
+      return res.status(403).json({ message: "You cannot update inventory items" });
+    }
     const { id } = req.params;
     if (!isValidObjectId(id)) return res.status(400).json({ error: "invalid id" });
 
@@ -87,6 +107,15 @@ export const updateInventory = async (req, res, next) => {
 // DELETE /api/inventory/:id
 export const deleteInventory = async (req, res, next) => {
   try {
+    // Check authentication and role
+    if (!req.user) {
+      return res.status(403).json({ message: "You need to login first" });
+    }
+
+    const allowedRoles = ["Admin", "IN-Manager"];
+    if (!allowedRoles.includes(req.user.role)) {
+      return res.status(403).json({ message: "You cannot delete inventory items" });
+    }
     const { id } = req.params;
     if (!isValidObjectId(id)) return res.status(400).json({ error: "invalid id" });
 

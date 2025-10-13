@@ -1,5 +1,6 @@
 // routes/InventoryRoute.js
 import express from "express";
+import verifyJWT from "../middlewares/auth.js";
 import {
   getAllInventory,
   addInventory,
@@ -12,9 +13,11 @@ const inventoryRouter = express.Router();
 
 // base path from index.js: /api/inventory
 inventoryRouter.get("/", getAllInventory);
-inventoryRouter.post("/", addInventory);
 inventoryRouter.get("/:id", getById);
-inventoryRouter.put("/:id", updateInventory);
-inventoryRouter.delete("/:id", deleteInventory);
+
+// Protected operations - require authentication
+inventoryRouter.post("/", verifyJWT, addInventory);
+inventoryRouter.put("/:id", verifyJWT, updateInventory);
+inventoryRouter.delete("/:id", verifyJWT, deleteInventory);
 
 export default inventoryRouter;

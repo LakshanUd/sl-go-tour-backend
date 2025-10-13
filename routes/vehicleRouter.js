@@ -1,5 +1,6 @@
 // routes/vehicleRoute.js
 import express from "express";
+import verifyJWT from "../middlewares/auth.js";
 import {
   createVehicle,
   deleteVehicle,
@@ -10,10 +11,13 @@ import {
 
 const vehicleRouter = express.Router();
 
-vehicleRouter.post("/", createVehicle);
+// Public reads
 vehicleRouter.get("/", getVehicles);
 vehicleRouter.get("/:vehicleID", getVehicleById);
-vehicleRouter.put("/:vehicleID", updateVehicle);
-vehicleRouter.delete("/:vehicleID", deleteVehicle);
+
+// Protected writes
+vehicleRouter.post("/", verifyJWT, createVehicle);
+vehicleRouter.put("/:vehicleID", verifyJWT, updateVehicle);
+vehicleRouter.delete("/:vehicleID", verifyJWT, deleteVehicle);
 
 export default vehicleRouter;

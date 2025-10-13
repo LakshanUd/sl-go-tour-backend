@@ -119,7 +119,9 @@ export async function getBookings(req, res) {
       filter.customer = user._id;
     }
 
-    const bookings = await Booking.find(filter).sort({ createdAt: -1 });
+    const bookings = await Booking.find(filter)
+      .populate('customer', 'firstName lastName email phone')
+      .sort({ createdAt: -1 });
     return res.status(200).json(bookings);
   } catch (error) {
     console.error("[getBookings]", error);
@@ -132,8 +134,8 @@ export async function getBookingById(req, res) {
   try {
     const { id } = req.params;
     let booking =
-      (await Booking.findOne({ bookingID: id })) ||
-      (await Booking.findById(id));
+      (await Booking.findOne({ bookingID: id }).populate('customer', 'firstName lastName email phone')) ||
+      (await Booking.findById(id).populate('customer', 'firstName lastName email phone'));
     if (!booking) return res.status(404).json({ message: "Booking not found" });
 
     if (!req.user) {

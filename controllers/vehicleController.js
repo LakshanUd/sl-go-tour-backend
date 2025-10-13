@@ -6,7 +6,9 @@ export async function createVehicle(req, res) {
   if (req.user == null) {
     return res.status(403).json({ message: "You need to login first" });
   }
-  if (req.user.role != "Admin") {
+  
+  const allowedRoles = ["Admin", "VC-Manager"];
+  if (!allowedRoles.includes(req.user.role)) {
     return res.status(403).json({ message: "You cannot add vehicles" });
   }
 
@@ -51,7 +53,9 @@ export async function updateVehicle(req, res) {
   if (req.user == null) {
     return res.status(403).json({ message: "You need to login first" });
   }
-  if (req.user.role != "Admin") {
+  
+  const allowedRoles = ["Admin", "VC-Manager"];
+  if (!allowedRoles.includes(req.user.role)) {
     return res.status(403).json({ message: "You cannot update vehicles" });
   }
 
@@ -74,7 +78,9 @@ export async function deleteVehicle(req, res) {
   if (req.user == null) {
     return res.status(403).json({ message: "You need to login first" });
   }
-  if (req.user.role != "Admin") {
+  
+  const allowedRoles = ["Admin", "VC-Manager"];
+  if (!allowedRoles.includes(req.user.role)) {
     return res.status(403).json({ message: "You cannot delete vehicles" });
   }
 

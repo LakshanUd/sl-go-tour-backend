@@ -12,10 +12,10 @@ import {
 
 const router = Router();
 
-/* --------- Order matters: static before dynamic --------- */
-router.get("/transactions", listTransactions);
-router.get("/summary", getSummary);
-router.get("/transactions/:id", getTransactionById);
+/* --------- Protected reads --------- */
+router.get("/transactions", verifyJWT, listTransactions);
+router.get("/summary", verifyJWT, getSummary);
+router.get("/transactions/:id", verifyJWT, getTransactionById);
 
 /* --------- Protected mutations --------- */
 router.post("/transactions", verifyJWT, createTransaction);

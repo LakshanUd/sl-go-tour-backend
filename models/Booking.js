@@ -43,6 +43,7 @@ const BookingItemSchema = new Schema(
     // For vehicles/accommodations/tours: use start/end; for meals: use date/time or qty only
     startDate: { type: Date },
     endDate:   { type: Date },
+    duration:  { type: String, default: "" }, // tour duration (e.g., "3 days", "5 days")
 
     // Quantities
     qty:  { type: Number, default: 1, min: 0 }, // meals/tickets
