@@ -19,7 +19,7 @@ const tourPackageSchema = new Schema(
     type: {
       type: String,
       required: true,
-      enum: ["City Tour", "Village Tour", "Sea Tour", "Lagoon Tour"],
+      enum: ["City Tour", "Village Tour", "Beach Tour", "Lagoon Tour"],
       default: "Village Tour",
       index: true,
     },
