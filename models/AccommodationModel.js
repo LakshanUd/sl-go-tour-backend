@@ -4,7 +4,7 @@ import mongoose from "mongoose";
 
 const { Schema } = mongoose;
 
-const TYPES = ["Hotel", "Villa", "Apartment", "Guest House", "Hostel", "Resort", "Homestay"];
+const TYPES = ["Single Room", "Double Room", "Family Room"];
 const STATUSES = ["Available", "Fully Booked", "Temporarily Closed"];
 const AMENITIES = ["WiFi", "Pool", "Parking", "AC", "Breakfast", "Spa"];
 
