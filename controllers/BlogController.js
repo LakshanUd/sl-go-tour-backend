@@ -65,6 +65,28 @@ export const getById = async (req, res) => {
   }
 };
 
+// POST /blogs/:id/view  → increment view count
+export const incrementViewCount = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const blog = await Blog.findByIdAndUpdate(
+      id,
+      { $inc: { viewCount: 1 } },
+      { new: true }
+    );
+    if (!blog) return res.status(404).json({ message: "Blog not found" });
+    return res.status(200).json({ 
+      message: "View count incremented", 
+      viewCount: blog.viewCount 
+    });
+  } catch (err) {
+    console.error("incrementViewCount error:", err);
+    return res
+      .status(500)
+      .json({ message: "Error incrementing view count", error: err.message });
+  }
+};
+
 // PUT /blogs/:id  → update a blog
 export const updateBlog = async (req, res) => {
   try {
@@ -134,6 +156,7 @@ export default {
   getAllBlogs,
   addBlog,
   getById,
+  incrementViewCount,
   updateBlog,
   deleteBlog,
 };

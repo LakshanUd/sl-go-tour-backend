@@ -79,14 +79,14 @@ export const getBlogReports = async (req, res) => {
   try {
     const blogs = await Blog.find().lean();
     
-    // Sort by views/pageviews
-    const mostRead = [...blogs].sort((a, b) => (b.views || 0) - (a.views || 0)).slice(0, 10);
-    const leastRead = [...blogs].sort((a, b) => (a.views || 0) - (b.views || 0)).slice(0, 10);
+    // Sort by viewCount (real view count from the database)
+    const mostRead = [...blogs].sort((a, b) => (b.viewCount || 0) - (a.viewCount || 0)).slice(0, 10);
+    const leastRead = [...blogs].sort((a, b) => (a.viewCount || 0) - (b.viewCount || 0)).slice(0, 10);
 
     const totalPosts = blogs.length;
-    const totalViews = blogs.reduce((sum, blog) => sum + (blog.views || 0), 0);
-    const avgViews = totalPosts > 0 ? totalViews / totalPosts : 0;
-    const publishedPosts = blogs.filter(blog => blog.status === "published").length;
+    const totalViews = blogs.reduce((sum, blog) => sum + (blog.viewCount || 0), 0);
+    const avgViews = totalPosts > 0 ? Math.round(totalViews / totalPosts) : 0;
+    const publishedPosts = blogs.length; // All blogs are considered published in this system
 
     res.json({
       mostRead,

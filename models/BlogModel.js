@@ -11,6 +11,7 @@ const blogSchema = new Schema(
     tags: [{ type: String, trim: true }],
     image: { type: String, default: "" },
     publishedDate: { type: Date, default: Date.now },
+    viewCount: { type: Number, default: 0 },
   },
   { timestamps: true }
 );
