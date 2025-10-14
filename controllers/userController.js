@@ -8,15 +8,6 @@ import axios from "axios";
 dotenv.config();
 
 export function saveUser(req, res) {
-
-    if(req.body.role != "Customer"){
-        if(req.user == null){
-            return res.status(403).json({ message: "You need to login as an admin" });
-        }
-        if(req.user.role != "Admin"){
-            return res.status(403).json({ message: "Unauthorized action" });
-        }
-    }
     
     const hashedPassword = bcrypt.hashSync(req.body.password, 10);
     const user = new User({
