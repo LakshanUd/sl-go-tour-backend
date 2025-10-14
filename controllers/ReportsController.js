@@ -161,33 +161,119 @@ export const getMealReports = async (req, res) => {
 // Accommodation Reports
 export const getAccommodationReports = async (req, res) => {
   try {
-    const bookings = await Booking.find({ status: "confirmed" })
-      .populate("items.accommodation", "name price type")
-      .lean();
+    // First check all bookings to see what statuses exist
+    const allBookings = await Booking.find({}).lean();
+    console.log("All bookings by status:", allBookings.reduce((acc, b) => {
+      acc[b.status] = (acc[b.status] || 0) + 1;
+      return acc;
+    }, {}));
+
+    // Try to find bookings with accommodation items regardless of status first
+    const bookingsWithAccommodation = await Booking.find({
+      "items.serviceType": "Accommodation"
+    }).populate("items.accommodation", "name pricePerNight type").lean();
+    
+    console.log("Bookings with accommodation items:", bookingsWithAccommodation.length);
+    
+    // Get bookings with accommodation items - try confirmed first, then all if none found
+    let bookings = await Booking.find({ 
+      status: "confirmed",
+      "items.serviceType": "Accommodation"
+    }).populate("items.accommodation", "name pricePerNight type").lean();
+    
+    console.log("Confirmed bookings with accommodation:", bookings.length);
+    
+    // If no confirmed bookings with accommodation, try all bookings with accommodation
+    if (bookings.length === 0) {
+      bookings = await Booking.find({ 
+        "items.serviceType": "Accommodation"
+      }).populate("items.accommodation", "name pricePerNight type").lean();
+      console.log("All bookings with accommodation (fallback):", bookings.length);
+    }
+
+    console.log("Found bookings:", bookings.length);
+    if (bookings.length > 0) {
+      console.log("Sample booking:", JSON.stringify(bookings[0], null, 2));
+      
+      // Show accommodation items specifically
+      const accommodationItems = bookings[0].items.filter(item => item.serviceType === "Accommodation");
+      if (accommodationItems.length > 0) {
+        console.log("Sample accommodation item:", JSON.stringify(accommodationItems[0], null, 2));
+      }
+    }
 
     // Calculate nights sold for each accommodation
     const accommodationStats = {};
+    let totalAccommodationItems = 0;
     
     bookings.forEach(booking => {
+      console.log(`Processing booking ${booking._id} with ${booking.items.length} items`);
       booking.items.forEach(item => {
+        console.log(`Item serviceType: ${item.serviceType}, accommodation: ${item.accommodation ? 'exists' : 'null'}`);
         if (item.serviceType === "Accommodation" && item.accommodation) {
+          totalAccommodationItems++;
           const accId = item.accommodation._id.toString();
           if (!accommodationStats[accId]) {
             accommodationStats[accId] = {
               _id: accId,
               name: item.accommodation.name,
-              price: item.accommodation.price,
+              price: item.accommodation.pricePerNight,
               type: item.accommodation.type,
               nightsSold: 0,
               status: "available"
             };
           }
           // Calculate nights based on start and end dates
-          if (item.startDate && item.endDate) {
-            const start = new Date(item.startDate);
-            const end = new Date(item.endDate);
-            const nights = Math.ceil((end - start) / (1000 * 60 * 60 * 24));
-            accommodationStats[accId].nightsSold += nights * (item.qty || 1);
+          console.log(`Processing accommodation item:`, {
+            name: item.accommodation.name,
+            startDate: item.startDate,
+            endDate: item.endDate,
+            qty: item.qty,
+            startDateType: typeof item.startDate,
+            endDateType: typeof item.endDate
+          });
+          
+          let nights = 0;
+          
+          // Try item-level dates first, then fall back to booking-level dates
+          let startDate = item.startDate;
+          let endDate = item.endDate;
+          
+          // If item dates are missing, use booking-level dates
+          if (!startDate || !endDate) {
+            startDate = booking.startDate;
+            endDate = booking.endDate;
+            console.log(`Using booking-level dates for ${item.accommodation.name}: start=${startDate}, end=${endDate}`);
+          }
+          
+          if (startDate && endDate) {
+            try {
+              const start = new Date(startDate);
+              const end = new Date(endDate);
+              
+              // Validate dates
+              if (isNaN(start.getTime()) || isNaN(end.getTime())) {
+                console.log(`Invalid dates for ${item.accommodation.name}: start=${startDate}, end=${endDate}`);
+              } else if (end <= start) {
+                console.log(`End date before or equal to start date for ${item.accommodation.name}: start=${start}, end=${end}`);
+              } else {
+                nights = Math.ceil((end - start) / (1000 * 60 * 60 * 24));
+                const totalNights = nights * (item.qty || 1);
+                console.log(`Calculated nights: ${nights} × ${item.qty || 1} = ${totalNights}`);
+                accommodationStats[accId].nightsSold += totalNights;
+              }
+            } catch (error) {
+              console.log(`Error calculating nights for ${item.accommodation.name}:`, error.message);
+            }
+          } else {
+            console.log(`No dates available for ${item.accommodation.name}: item dates=${item.startDate}/${item.endDate}, booking dates=${booking.startDate}/${booking.endDate}`);
+            
+            // Fallback: Use default nights calculation when dates are missing
+            // This assumes accommodation bookings are typically for 1 night
+            const defaultNights = 1; // Default to 1 night when no dates available
+            const totalNights = defaultNights * (item.qty || 1);
+            console.log(`Using default nights calculation: ${defaultNights} × ${item.qty || 1} = ${totalNights}`);
+            accommodationStats[accId].nightsSold += totalNights;
           }
         }
       });
@@ -206,15 +292,47 @@ export const getAccommodationReports = async (req, res) => {
     const totalProperties = allAccommodations.length;
     const totalNights = Object.values(accommodationStats).reduce((sum, acc) => sum + acc.nightsSold, 0);
     const totalRevenue = Object.values(accommodationStats).reduce((sum, acc) => sum + (acc.price * acc.nightsSold), 0);
-    const avgOccupancy = totalProperties > 0 ? (totalNights / totalProperties) : 0;
+    
+    // Calculate average occupancy as a percentage
+    // Assuming each property can be booked for 30 days per month on average
+    const maxPossibleNights = totalProperties * 30; // 30 days per property per month
+    const avgOccupancy = maxPossibleNights > 0 ? ((totalNights / maxPossibleNights) * 100) : 0;
+
+    console.log("Accommodation Report Data:", {
+      totalBookings: bookings.length,
+      totalAccommodationItems,
+      totalProperties,
+      totalNights,
+      totalRevenue,
+      avgOccupancy,
+      mostBookedCount: mostBooked.length,
+      leastBookedCount: leastBooked.length,
+      accommodationStatsCount: Object.keys(accommodationStats).length
+    });
 
     res.json({
       mostBooked,
       leastBooked,
       totalProperties,
       totalNights,
-      totalRevenue,
-      avgOccupancy
+      totalRevenue: totalRevenue || 0,
+      avgOccupancy,
+      // Debug info
+      debug: {
+        totalBookings: allBookings.length,
+        bookingsWithAccommodation: bookingsWithAccommodation.length,
+        processedBookings: bookings.length,
+        totalAccommodationItems,
+        accommodationStatsCount: Object.keys(accommodationStats).length,
+        sampleAccommodationItem: bookings.length > 0 ? 
+          bookings[0].items.find(item => item.serviceType === "Accommodation") : null,
+        sampleBooking: bookings.length > 0 ? {
+          bookingID: bookings[0].bookingID,
+          startDate: bookings[0].startDate,
+          endDate: bookings[0].endDate,
+          status: bookings[0].status
+        } : null
+      }
     });
   } catch (error) {
     res.status(500).json({ message: error.message });
